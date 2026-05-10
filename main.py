@@ -23,8 +23,14 @@ app.add_middleware(
 
 # Mount static files
 static_path = os.path.join(os.path.dirname(__file__), "static")
-os.makedirs(static_path, exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_path), name="static")
+if not os.path.exists(static_path):
+    try:
+        os.makedirs(static_path, exist_ok=True)
+    except OSError:
+        pass # Ignore in Vercel's read-only file system
+
+if os.path.exists(static_path):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 HEADERS = {
     "User-Agent": "SmallCapResearch/1.0 research@smallcap.app",
